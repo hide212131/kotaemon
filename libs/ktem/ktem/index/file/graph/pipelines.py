@@ -114,6 +114,14 @@ class GraphRAGIndexingPipeline(IndexDocumentPipeline):
 
         # Construct the command
         init_command = ["graphrag", "init", "--root", input_path]
+        prompt_tune_command = [
+            "graphrag",
+            "prompt-tune",
+            "--root",
+            input_path,
+            "--output",
+            f"{input_path}/prompts",
+        ]
         index_command = ["graphrag", "index", "--root", input_path]
 
         # Run the command
@@ -133,6 +141,14 @@ class GraphRAGIndexingPipeline(IndexDocumentPipeline):
             except shutil.Error:
                 # Handle the error if the file copy fails
                 print("failed to copy customized GraphRAG config file. ")
+
+        # Run the prompt-tune command
+        yield Document(
+            channel="debug",
+            text="[GraphRAG] Running prompt-tune...",
+        )
+        result = subprocess.run(prompt_tune_command, capture_output=True, text=True)
+        print(result.stdout)
 
         # Run the command and stream stdout
         with subprocess.Popen(
